@@ -20,3 +20,11 @@ h2 {
 .rating span {
   margin: 0.1rem;
 }
+.At-Btn {
+  padding: 6px 24px 6px 24px;
+  border-radius: 24px;
+  background-color: dimgray;
+}
+.At-Radius {
+  border-radius: 24px;
+}
