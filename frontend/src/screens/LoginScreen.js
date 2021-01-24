@@ -38,7 +38,6 @@ const LoginScreen = ({ location, history }) => {
         <Form.Group controlId='email'>
           <Form.Label>Email Address</Form.Label>
           <Form.Control
-          className="At-Radius"
             type='email'
             placeholder='Enter email'
             value={email}
@@ -50,14 +49,13 @@ const LoginScreen = ({ location, history }) => {
           <Form.Label>Password Address</Form.Label>
           <Form.Control
             type='password'
-          className="At-Radius"
-          placeholder='Enter password'
+            placeholder='Enter password'
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           ></Form.Control>
         </Form.Group>
 
-        <Button type='submit' className="At-Btn" variant='primary'>
+        <Button type='submit' variant='primary'>
           Sign In
         </Button>
       </Form>

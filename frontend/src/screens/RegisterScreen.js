@@ -48,7 +48,6 @@ const RegisterScreen = ({ location, history }) => {
           <Form.Control
             type='name'
             placeholder='Enter name'
-            className="At-Radius"
             value={name}
             onChange={(e) => setName(e.target.value)}
           ></Form.Control>
@@ -59,7 +58,6 @@ const RegisterScreen = ({ location, history }) => {
           <Form.Control
             type='email'
             placeholder='Enter email'
-          className="At-Radius"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           ></Form.Control>
@@ -71,7 +69,6 @@ const RegisterScreen = ({ location, history }) => {
             type='password'
             placeholder='Enter password'
             value={password}
-          className="At-Radius"
             onChange={(e) => setPassword(e.target.value)}
           ></Form.Control>
         </Form.Group>
@@ -81,13 +78,12 @@ const RegisterScreen = ({ location, history }) => {
           <Form.Control
             type='password'
             placeholder='Confirm password'
-          className="At-Radius"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           ></Form.Control>
         </Form.Group>
 
-        <Button type='submit' className="At-Btn" variant='primary'>
+        <Button type='submit' variant='primary'>
           Register
         </Button>
       </Form>
