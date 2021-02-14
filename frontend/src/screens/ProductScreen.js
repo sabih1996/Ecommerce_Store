@@ -1,118 +1,132 @@
-import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useEffect } from 'react'
+import { LinkContainer } from 'react-router-bootstrap'
+import { Table, Button, Row, Col } from 'react-bootstrap'
 import { useDispatch, useSelector } from 'react-redux'
-import { Row, Col, Image, ListGroup, Card, Button, Form } from 'react-bootstrap'
-import Rating from '../components/Rating'
 import Message from '../components/Message'
 import Loader from '../components/Loader'
-import { listProductDetails } from '../actions/productActions'
+import {
+  listProducts,
+  deleteProduct,
+  createProduct,
+} from '../actions/productActions'
+import { PRODUCT_CREATE_RESET } from '../constants/productConstants'
 
-const ProductScreen = ({ history, match }) => {
-  const [qty, setQty] = useState(1)
-
+const ProductListScreen = ({ history, match }) => {
   const dispatch = useDispatch()
 
-  const productDetails = useSelector((state) => state.productDetails)
-  const { loading, error, product } = productDetails
+  const productList = useSelector((state) => state.productList)
+  const { loading, error, products } = productList
+
+  const productDelete = useSelector((state) => state.productDelete)
+  const {
+    loading: loadingDelete,
+    error: errorDelete,
+    success: successDelete,
+  } = productDelete
+
+  const productCreate = useSelector((state) => state.productCreate)
+  const {
+    loading: loadingCreate,
+    error: errorCreate,
+    success: successCreate,
+    product: createdProduct,
+  } = productCreate
+
+  const userLogin = useSelector((state) => state.userLogin)
+  const { userInfo } = userLogin
 
   useEffect(() => {
-    dispatch(listProductDetails(match.params.id))
-  }, [dispatch, match])
+    dispatch({ type: PRODUCT_CREATE_RESET })
 
-  const addToCartHandler = () => {
-    history.push(`/cart/${match.params.id}?qty=${qty}`)
+    if (!userInfo.isAdmin) {
+      history.push('/login')
+    }
+
+    if (successCreate) {
+      history.push(`/admin/product/${createdProduct._id}/edit`)
+    } else {
+      dispatch(listProducts())
+    }
+  }, [
+    dispatch,
+    history,
+    userInfo,
+    successDelete,
+    successCreate,
+    createdProduct,
+  ])
+
+  const deleteHandler = (id) => {
+    if (window.confirm('Are you sure')) {
+      dispatch(deleteProduct(id))
+    }
+  }
+
+  const createProductHandler = () => {
+    dispatch(createProduct())
   }
 
   return (
     <>
-      <Link className='btn btn-light my-3' to='/'>
-        Go Back
-      </Link>
+      <Row className='align-items-center'>
+        <Col>
+          <h1>Products</h1>
+        </Col>
+        <Col className='text-right'>
+          <Button className='my-3' onClick={createProductHandler}>
+            <i className='fas fa-plus'></i> Create Product
+          </Button>
+        </Col>
+      </Row>
+      {loadingDelete && <Loader />}
+      {errorDelete && <Message variant='danger'>{errorDelete}</Message>}
+      {loadingCreate && <Loader />}
+      {errorCreate && <Message variant='danger'>{errorCreate}</Message>}
       {loading ? (
         <Loader />
       ) : error ? (
         <Message variant='danger'>{error}</Message>
       ) : (
-        <Row>
-          <Col md={6}>
-            <Image src={product.image} alt={product.name} fluid />
-          </Col>
-          <Col md={3}>
-            <ListGroup variant='flush'>
-              <ListGroup.Item>
-                <h3>{product.name}</h3>
-              </ListGroup.Item>
-              <ListGroup.Item>
-                <Rating
-                  value={product.rating}
-                  text={`${product.numReviews} reviews`}
-                />
-              </ListGroup.Item>
-              <ListGroup.Item>Price: ${product.price}</ListGroup.Item>
-              <ListGroup.Item>
-                Description: {product.description}
-              </ListGroup.Item>
-            </ListGroup>
-          </Col>
-          <Col md={3}>
-            <Card>
-              <ListGroup variant='flush'>
-                <ListGroup.Item>
-                  <Row>
-                    <Col>Price:</Col>
-                    <Col>
-                      <strong>${product.price}</strong>
-                    </Col>
-                  </Row>
-                </ListGroup.Item>
-
-                <ListGroup.Item>
-                  <Row>
-                    <Col>Status:</Col>
-                    <Col>
-                      {product.countInStock > 0 ? 'In Stock' : 'Out Of Stock'}
-                    </Col>
-                  </Row>
-                </ListGroup.Item>
-
-                {product.countInStock > 0 && (
-                  <ListGroup.Item>
-                    <Row>
-                      <Col>Qty</Col>
-                      <Col>
-                        <Form.Control
-                          as='select'
-                          value={qty}
-                          onChange={(e) => setQty(e.target.value)}
-                        >
-                          {[...Array(product.countInStock).keys()].map((x) => (
-                            <option key={x + 1} value={x + 1}>
-                              {x + 1}
-                            </option>
-                          ))}
-                        </Form.Control>
-                      </Col>
-                    </Row>
-                  </ListGroup.Item>
-                )}
-
-                <ListGroup.Item>
+        <Table striped bordered hover responsive className='table-sm'>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>NAME</th>
+              <th>PRICE</th>
+              <th>CATEGORY</th>
+              <th>BRAND</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {products.map((product) => (
+              <tr key={product._id}>
+                <td>{product._id}</td>
+                <td>{product.name}</td>
+                <td>${product.price}</td>
+                <td>{product.category}</td>
+                <td>{product.brand}</td>
+                <td>
+                  <LinkContainer to={`/admin/product/${product._id}/edit`}>
+                    <Button variant='light' className='btn-sm'>
+                      <i className='fas fa-edit'></i>
+                    </Button>
+                  </LinkContainer>
                   <Button
-                    onClick={addToCartHandler}
-                    className='btn-block'
-                    type='button'
-                    disabled={product.countInStock === 0}
+                    variant='danger'
+                    className='btn-sm'
+                    onClick={() => deleteHandler(product._id)}
                   >
-                    Add To Cart
+                    <i className='fas fa-trash'></i>
                   </Button>
-                </ListGroup.Item>
-              </ListGroup>
-            </Card>
-          </Col>
-        </Row>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
       )}
     </>
   )
 }
 
-export default ProductScreen
+export default ProductListScreen
